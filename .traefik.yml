@@ -1,0 +1,10 @@
+displayName: Guard
+type: middleware
+iconPath: .assets/icon.png
+
+import: github.com/chendo/traefik-guard
+
+summary: 'Custom built in WAF'
+
+testData:
+  guardUrl: http://localhost/_guard

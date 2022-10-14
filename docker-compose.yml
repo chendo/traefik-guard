@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  traefik:
+    image: traefik:latest
+    ports:
+      - "8080:80"
+    command:
+      - --api.dashboard=true
+      - --api.insecure=true
+      - --experimental.localPlugins.traefik-guard.moduleName=github.com/chendo/traefik-guard
+      - --providers.docker=true
+      - --entrypoints.http.address=:80
+      - --accesslog=true
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      - '.:/plugins-local/src/github.com/chendo/traefik-guard'
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.traefik.loadbalancer.server.port=8080
+      - traefik.http.middlewares.guard.plugin.traefik-guard.guardUrl=http://guard/_guard
+    extra_hosts:
+      - guard:x.x.x.x
+  dummy:
+    image: containous/whoami
+
+  website:
+    image: containous/whoami
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.website.rule=PathPrefix(`/website`)
+      - traefik.http.routers.website.middlewares=guard@docker
